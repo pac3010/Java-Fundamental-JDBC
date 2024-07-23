@@ -1,4 +1,4 @@
-package daos;
+package daos.implementation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,23 +7,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import daos.RegionDAOInterface;
 import models.Region;
 
-public class RegionDAO {
-  
+public class RegionDAO implements RegionDAOInterface {
   private Connection connection;
 
   public RegionDAO(Connection connection) {
     this.connection = connection;
   }
-  //Get data by id
-  public Region getById(int region_id) {
+  @Override
+  //Get Data by id
+  public Region get(int id) {
     String query = "SELECT * FROM regions WHERE region_id = ?";
     Region region = null;
 
     try {
       PreparedStatement preparedStatement = connection.prepareStatement(query);
-      preparedStatement.setInt(1, region_id);
+      preparedStatement.setInt(1, id);
 
       ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -37,8 +38,9 @@ public class RegionDAO {
     return region;
   }
 
+  @Override
   //Get All Data
-  public List<Region> getAll() {
+  public List<Region> get() {
     List<Region> regions = new ArrayList<>();
     String query = "SELECT * FROM regions";
 
@@ -55,66 +57,66 @@ public class RegionDAO {
       return regions;
     }
 
+  @Override
   //Insert Data
-  public boolean insert(Region region){
+  public Integer insert(Region region){
     
     try{
       PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO regions (region_id, region_name) VALUES (?,?)");
-      preparedStatement.setInt(1, region.getRegion_id());
-      preparedStatement.setString(2, region.getRegion_name());
-      int countVar = preparedStatement.executeUpdate();
-      System.out.println(countVar);
+      preparedStatement.setInt(1, region.getId());
+      preparedStatement.setString(2, region.getName());
+      int rowsCount = preparedStatement.executeUpdate();
 
-      return true;
+      return rowsCount;
     } catch(SQLException e){
       System.out.println(e.getMessage());
     }
 
-    return false;
+    return 0;
   }
 
+  @Override
   //Update Data by Id
-  public void update(String new_region_name, int region_id) {
+  public Integer update(Region region) {
     String query = "UPDATE regions SET region_name = ? WHERE region_id = ?";
 
-    Region existedRegion = getById(region_id);
+    Region existedRegion = get(region.getId());
     if(existedRegion == null){
-      System.out.println("No data found");
+      return 0;
     }
 
     try {
       PreparedStatement preparedStatement = connection.prepareStatement(query);
-      preparedStatement.setString(1, new_region_name);
-      preparedStatement.setInt(2, region_id);
+      preparedStatement.setString(1, region.getName());
+      preparedStatement.setInt(2, region.getId());
       int rowsCount = preparedStatement.executeUpdate();
-      if(rowsCount > 1){
-        System.out.println("1 row has been updated");
-      }else{
-        System.out.format("%d rows has been updated", rowsCount);
-      }
       
+      return rowsCount;
     } catch (SQLException e) {
         System.out.println(e.getMessage());
-    } 
-  }
-
-  //Delete data by id
-  public void delete(int region_id){
-    String query = "DELETE FROM regions WHERE region_id = ?";
-  
-
-  try {
-    PreparedStatement preparedStatement = connection.prepareStatement(query);
-    preparedStatement.setInt(1, region_id);
-
-    int rowsCount = preparedStatement.executeUpdate();
-    if(rowsCount>1){
-      System.out.println("1 data has been deleted");
-    }else{
-      System.out.format("%d data has been Deleted\n", rowsCount);
     }
-  } catch (SQLException e) {
-    System.out.println(e.getMessage());
+    return 0; 
   }
+
+  @Override
+  //Delete data by id
+  public Integer delete(int id){
+    String query = "DELETE FROM regions WHERE region_id = ?";
+
+    Region existedRegion = get(id);
+    if(existedRegion == null){
+      return 0;
+    }
+
+    try {
+      PreparedStatement preparedStatement = connection.prepareStatement(query);
+      preparedStatement.setInt(1, id);
+
+      int rowsCount = preparedStatement.executeUpdate();
+      return rowsCount;
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
+    return 0;
 }
 }

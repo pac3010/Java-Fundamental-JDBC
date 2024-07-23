@@ -1,5 +1,6 @@
 import tools.DbConnection;
-import daos.RegionDAO;
+import daos.RegionDAOInterface;
+import daos.implementation.RegionDAO;
 import models.Region;
 
 public class Test {
@@ -7,19 +8,17 @@ public class Test {
         public static void main(String[] args) throws Exception {
             DbConnection connection = new DbConnection();
             System.out.println(connection.getConnection());
-    
-            RegionDAO rdao = new RegionDAO(connection.getConnection());
-            // Update data
-            // rdao.update("Jepang", 7);
+
+            RegionDAOInterface rdao = new RegionDAO(connection.getConnection());
             
             //Delete data
-            rdao.delete(7);
-
+            // rdao.delete(7);
             //get all data
-            for(Region region : rdao.getAll()){
-                System.out.println(region.getRegion_id());
-                System.out.println(region.getRegion_name());
+            for(Region region : rdao.get()){
+                System.out.println(region.getId());
+                System.out.println(region.getName());
             }
-            
+            // Region newRegion = new Region(6, "Madagascar");
+            // rdao.update(newRegion);
         }
     }
